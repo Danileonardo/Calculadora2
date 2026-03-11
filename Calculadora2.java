@@ -16,49 +16,77 @@ public class Calculadora2 {
         return a * b;
     }
     private static double multiplicacion(double a, double b, double c) {
-        return a * b * c;}
+        return a * b * c;
+    }
 
     protected static float division(float a, float b) {
-        return a/b;
-    }
-    public static int numero(String mensaje) {
-        Scanner calculadora = new Scanner(System.in);
-        System.out.println(mensaje);
-        calculadora.close();
-        return calculadora.nextInt();
-    }
-    public static char operacion() {
-        Scanner calculadora = new Scanner(System.in);
-        System.out.println("Ahora como quieres calcularlos: ");
-        calculadora.close();
-        return calculadora.next().charAt(0);
+        if (b == 0) {
+            System.out.println("No se puede dividir por cero");
+            return 0;
+        }
+        return a / b;
     }
 
-    //funcion para detectar la cantidad de operdaores que quiera el usuario
+    // funcion para detectar la cantidad de operadores que quiera el usuario
     public static void entradaMatematicaUsuario(){
         try (Scanner entrada = new Scanner(System.in)) {
-            System.out.println("introduce la operacion: ");
+            System.out.println("Introduce una operacion (ej: 2 + 3 + 4): ");
             String linea = entrada.nextLine();
-            String[] partes = linea.split(" "); //Funcion split para separar los elementos de la cadena el " " los separa creando una lista con indi
+            String[] partes = linea.split(" "); // separa la operacion por espacios
+            if (partes.length < 3) {
+                System.out.println("Operacion invalida");
+                return;
+            }
             char operador = partes[1].charAt(0);
-            switch (operador) {
-                case '+' -> System.out.println(suma(Integer.parseInt(partes[0]), Integer.parseInt(partes[2]))); //Aqui el break se sustituye por "->" se aplica de forma implicita
-                case '-' -> System.out.println(resta(Integer.parseInt(partes[0]), Integer.parseInt(partes[2])));
-                case '*' -> {
-                    if (partes.length == 3) { //si la longitud de la cadena es 3 entonces solo se multiplican dos numeros
-                        System.out.println(multiplicacion(Double.parseDouble(partes[0]), Double.parseDouble(partes[2])));
-                    } else {System.out.println(multiplicacion(Double.parseDouble(partes[0]), Double.parseDouble(partes[2]), Double.parseDouble(partes[4])));
-                    
+            try {
+                switch (operador) {
+                    case '+' -> {
+                    int resultado = Integer.parseInt(partes[0]);
+                        
+                    for (int i = 2; i < partes.length; i += 2) {
+                        resultado += Integer.parseInt(partes[i]);
+                        }
+                        
+                    System.out.println(resultado);
                     }
+                    case '-' -> {
+                        int resultado = Integer.parseInt(partes[0]);
+
+                    for (int i = 2; i < partes.length; i += 2) {
+                        resultado -= Integer.parseInt(partes[i]);
+                        }
+
+                    System.out.println(resultado);
+                     }
+                    case '*' -> {
+                        double resultado = Double.parseDouble(partes[0]);
+
+                    for (int i = 2; i < partes.length; i += 2) {
+                        resultado *= Double.parseDouble(partes[i]);
+                        }
+
+                      System.out.println(resultado);
+                    }
+                    case '/' -> {
+                        float resultado = Float.parseFloat(partes[0]);
+
+                        for (int i = 2; i < partes.length; i += 2) {
+                            resultado = division(resultado, Float.parseFloat(partes[i]));
+                        }
+
+                        System.out.println(resultado);
+                    }
+                        
+                    default -> System.out.println("Operador no valido");
                 }
-                case '/' -> System.out.println(division(Float.parseFloat(partes[0]), Float.parseFloat(partes[2])));
-                default -> throw new AssertionError();
+            } catch (NumberFormatException e) {
+                    System.out.println("Debes ingresar numeros validos");
             }
         }
-        
     }
 
     public static void main(String[] args) {
         entradaMatematicaUsuario();
     }
 }
+
