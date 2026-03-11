@@ -6,8 +6,7 @@ public class Calculadora2 {
 
     protected static float division(float a, float b) {
         if (b == 0) {
-            System.out.println("No se puede dividir por cero");
-            return 0;
+            throw new ArithmeticException("No se puede dividir por cero");
         }
         return a / b;
     }
@@ -104,5 +103,6 @@ public class Calculadora2 {
         entradaMatematicaUsuario();
     }
 }
+
 
 
