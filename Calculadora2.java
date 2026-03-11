@@ -1,5 +1,3 @@
-package genc181802.desafio2;
-
 import java.util.Scanner;
 
 public class Calculadora2 {
@@ -103,6 +101,7 @@ public class Calculadora2 {
         entradaMatematicaUsuario();
     }
 }
+
 
 
 
