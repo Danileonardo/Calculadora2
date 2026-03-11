@@ -1,55 +1,102 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Calculadora2 {
 
     public static void main(String[] args) {
-        try (Scanner entrada = new Scanner(System.in)) {
-            System.out.println("Introduce una operación (ej: 2+3*4/2 o 2 + 3 * 4 / 2):");
-            String linea = entrada.nextLine();
+        Scanner entrada = new Scanner(System.in);
+        System.out.println("Introduce una operación (ej: (1+3*3+1-4)/7 o 2+3*4/2):");
+        String linea = entrada.nextLine();
+        linea = linea.replaceAll("\\s+", ""); // quitar espacios
 
-            // Eliminar espacios
-            linea = linea.replaceAll("\\s+", "");
-
-            // Separar números y operadores
-            List<String> tokens = new ArrayList<>();
-            StringBuilder num = new StringBuilder();
-            for (char c : linea.toCharArray()) {
-                if ("+-*/".indexOf(c) >= 0) {
-                    tokens.add(num.toString());
-                    tokens.add(String.valueOf(c));
-                    num = new StringBuilder();
-                } else {
-                    num.append(c);
-                }
-            }
-            tokens.add(num.toString());
-
-            // Procesar multiplicación y división primero
-            for (int i = 0; i < tokens.size(); i++) {
-                String token = tokens.get(i);
-                if (token.equals("*") || token.equals("/")) {
-                    double a = Double.parseDouble(tokens.get(i - 1));
-                    double b = Double.parseDouble(tokens.get(i + 1));
-                    double res = token.equals("*") ? a * b : a / b;
-                    tokens.set(i - 1, String.valueOf(res));
-                    tokens.remove(i); // eliminar operador
-                    tokens.remove(i); // eliminar segundo número
-                    i--; // retroceder índice
-                }
-            }
-
-            // Procesar suma y resta
-            double resultado = Double.parseDouble(tokens.get(0));
-            for (int i = 1; i < tokens.size(); i += 2) {
-                String op = tokens.get(i);
-                double num2 = Double.parseDouble(tokens.get(i + 1));
-                if (op.equals("+")) resultado += num2;
-                else if (op.equals("-")) resultado -= num2;
-            }
-
+        try {
+            double resultado = evaluar(linea);
             System.out.printf("Resultado: %.2f\n", resultado);
+        } catch (Exception e) {
+            System.out.println("Error en la operación: " + e.getMessage());
         }
+    }
+
+    // Evaluar toda la expresión respetando jerarquía y paréntesis
+    private static double evaluar(String expr) {
+        return parseSumSub(expr, 0).value;
+    }
+
+    // Clase auxiliar para manejar el valor calculado y el índice hasta donde se evaluó
+    private static class Result {
+        double value;
+        int index;
+        Result(double value, int index) {
+            this.value = value;
+            this.index = index;
+        }
+    }
+
+    // Suma y resta
+    private static Result parseSumSub(String expr, int start) {
+        Result res = parseMulDiv(expr, start);
+        double valor = res.value;
+        int i = res.index;
+
+        while (i < expr.length()) {
+            char op = expr.charAt(i);
+            if (op != '+' && op != '-') break;
+
+            Result next = parseMulDiv(expr, i + 1);
+            if (op == '+') valor += next.value;
+            else valor -= next.value;
+            i = next.index;
+        }
+        return new Result(valor, i);
+    }
+
+    // Multiplicación y división
+    private static Result parseMulDiv(String expr, int start) {
+        Result res = parseFactor(expr, start);
+        double valor = res.value;
+        int i = res.index;
+
+        while (i < expr.length()) {
+            char op = expr.charAt(i);
+            if (op != '*' && op != '/') break;
+
+            Result next = parseFactor(expr, i + 1);
+            if (op == '*') valor *= next.value;
+            else valor /= next.value;
+            i = next.index;
+        }
+        return new Result(valor, i);
+    }
+
+    // Número, decimal, negativo o paréntesis
+    private static Result parseFactor(String expr, int start) {
+        int i = start;
+        double valor = 0;
+        boolean negativo = false;
+
+        if (i < expr.length() && expr.charAt(i) == '-') {
+            negativo = true;
+            i++;
+        }
+
+        if (i < expr.length() && expr.charAt(i) == '(') {
+            Result r = parseSumSub(expr, i + 1);
+            if (r.index >= expr.length() || expr.charAt(r.index) != ')') {
+                throw new RuntimeException("Paréntesis desbalanceados");
+            }
+            valor = r.value;
+            i = r.index + 1;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            while (i < expr.length() && (Character.isDigit(expr.charAt(i)) || expr.charAt(i) == '.')) {
+                sb.append(expr.charAt(i++));
+            }
+            if (sb.length() == 0) {
+                throw new RuntimeException("Número esperado en posición " + i);
+            }
+            valor = Double.parseDouble(sb.toString());
+        }
+
+        if (negativo) valor = -valor;
+        return new Result(valor, i);
     }
 }
